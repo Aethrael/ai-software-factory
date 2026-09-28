@@ -1,5 +1,9 @@
 # Laya routing and token-budget experiment
 
+Follow-up: [one review-scope candidate tested inside Archon](REVIEW-PROBE.md).
+That probe found no accepted replacement or verified avoided agent calls.
+The standalone experiment described below remains preliminary evidence.
+
 Can a compact decision prompt preserve useful routing judgments while reducing
 the input processed by a local Laya model? This opt-in experiment produces evidence
 for that question. It does not replace grounded triage, select coding models,
