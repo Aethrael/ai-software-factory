@@ -2,6 +2,8 @@
 
 Follow-up: [one review-scope candidate tested inside Archon](REVIEW-PROBE.md).
 That probe found no accepted replacement or verified avoided agent calls.
+Its follow-up compared both checkpoints and separate questions on seven public
+inputs: no eligible replacements, and splitting nearly doubled encoder tokens.
 The standalone experiment described below remains preliminary evidence.
 
 Can a compact decision prompt preserve useful routing judgments while reducing

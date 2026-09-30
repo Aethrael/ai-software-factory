@@ -148,3 +148,84 @@ acceptable explanation contract, and measured quality and total cost including
 fallbacks. Keeping every optional review could avoid missed reviews, but would
 add review work; that is a separate deterministic alternative to measure, not a
 proven Laya benefit.
+
+## Follow-up: independent questions and another checkpoint
+
+On 2026-09-29, the same review-selection candidate was tested with two separate
+yes/no (`noul`) questions instead of one four-way choice. Questions and the 0.9
+diagnostic threshold were frozen before inference on five additional public
+Archon PRs: #3199, #3198, #2959, #2483 and #3361. These were selected for small
+change size and manageable descriptions, not randomly sampled or labelled by
+maintainers. The original factory PRs #11 and #9 remained regression examples.
+The policy's intended meaning was preserved, but its phrasing necessarily
+changed; this tests a question-format candidate, not mathematical equivalence.
+
+Both pinned checkpoints were compared on the identical seven full snapshots:
+
+| Checkpoint | Format | Full inputs scored | Rejected | Eligible at threshold | Encoder tokens |
+| --- | --- | --- | --- | --- | --- |
+| English base | Combined | 3/7 | 4/7 | 0/7 | 2,197 |
+| English base | Separate questions | 3/7 | 4/7 | 0/7 | 4,349 |
+| Typed decisions | Combined | 3/7 | 4/7 | 0/7 | 2,197 |
+| Typed decisions | Separate questions | 3/7 | 4/7 | 0/7 | 4,349 |
+
+Splitting the decision used **98% more encoder tokens** on the scored inputs.
+The shared state is processed in two question sequences even when submitted in
+one prediction call. It did not fix the README error-review false positive.
+On the new RepoCloud documentation-only PR #3199, the combined format selected
+errors=false, while the split format regressed to errors=true on both checkpoints.
+On the test-only Windows path-normalization PR #2959, both formats selected
+both lenses. These are concrete diff observations, not a scored quality holdout.
+The documentation policy's small-mechanical-change exception remains ambiguous.
+
+The split policy requires **each lens's selected probability** to reach 0.9;
+that does not establish a joint 90% correctness guarantee. Neither checkpoint
+qualified on any input. Larger inputs were refused without inference or trimming.
+There is still no avoided original-agent call or established factory token saving.
+
+The general checkpoint was replayed inside the pinned Archon engine with the
+original resolver. The specialized checkpoint's follow-up was replayed offline.
+Automatic approval rejected its repeat engine invocation because Archon's CLI
+also launches a separate Claude call to generate a conversation title. The
+general-checkpoint engine run attempted that title call and failed authentication;
+the classifier itself used only local inference. This reveals a separate resource
+cost outside the classifier receipt. No complete external-call absence or
+end-to-end cost claim is made. The earlier specialized PR #11 engine probe remains
+valid; the five new specialized examples are not represented as engine executions.
+
+Loaded checkpoint identities and a differing decision-head parameter sample were
+recorded, and a separate direct load matched that parameter to each checkpoint's
+stored weights. The checkpoints produced different raw probabilities but the same
+decisions. Preliminary runs, provenance checks and development retries are excluded
+from the per-profile timings. No latency or throughput improvement is claimed.
+
+As a deterministic control, always enabling both optional lenses requires no
+classifier or encoder tokens. The original override resolver was exercised
+offline under auto/on/off settings. This avoids omitting optional reviews by
+construction, but adds unnecessary reviews; their cost was not measured. It is
+not a demonstrated total-cost improvement and was not enabled in Factory.
+
+The [complete follow-up record](results/review-format-followup.json) includes the
+fixed questions, all observations, five new public snapshots, references and
+hashes for the original two, package versions, checkpoint load checks, the general
+checkpoint engine receipt, and the deterministic control. The comparator imported
+`QUESTION`, `model_state` and `read_prediction` from `review_probe.py` at factory
+contribution commit `84e6931f616804cfec51579040a84177b9f11579`.
+
+To reproduce the local comparison, load each `models.<checkpoint>.config` model
+and revision with the pinned environment above. For each input, use its inline
+`snapshot`, or read `reference` relative to `experiments/laya`; construct the state
+with `model_state`. Compare `{"scope": QUESTION}` with that model config's
+`questions`. Before `predict`, audit every question against the full uncut sequence:
+CLS, encoded `"<type> question: <instructions>"`, SEP, MASK plus each full option,
+SEP, the complete encoded state, SEP. Boolean options are false then true, with
+their recorded descriptions. Refuse any discrepancy with `build_sequence` at
+max_len=1024/head_max_len=384, including option/instruction loss. Alternate profile
+order by case. Submit both boolean questions together; never pass expected labels.
+Record their individual probabilities and sum the reported encoder usage without
+excluding rejected cases from coverage. Engine execution uses the same disposable
+slice and resolver as above; account separately for its automatic title call.
+
+This closes the split-question hypothesis with a negative result. Further changes
+to this classifier need a new hypothesis and independently evaluated evidence;
+lowering the confidence threshold would not remove the observed mistakes.
